@@ -10,6 +10,7 @@
 //! loopback port, writes the lock file, and serves connections until the window
 //! closes, at which point the lock file is removed.
 
+mod history_panel;
 mod lockfile;
 mod open_diff;
 mod server;
@@ -25,6 +26,7 @@ use gpui::{
 use util::ResultExt as _;
 use workspace::Workspace;
 
+pub use history_panel::{ClaudeHistoryPanel, init_history_panel};
 pub use lockfile::{IDE_NAME, generate_auth_token};
 pub use server::{Dispatcher, ProtocolError, ToolDescriptor, bind, serve_connection};
 pub use tools::WorkspaceDispatcher;
@@ -59,14 +61,11 @@ pub fn init(cx: &mut App) {
 
     // Lock files are removed when a window closes (see `Drop`), but a hard quit
     // skips destructors, so clean them up explicitly on app exit too.
-    cx.on_app_quit({
-        let servers = servers.clone();
-        move |cx| {
-            for server in servers.borrow().values() {
-                server.update(cx, |server, _| server.remove_lockfile());
-            }
-            async move {}
+    cx.on_app_quit(move |cx| {
+        for server in servers.borrow().values() {
+            server.update(cx, |server, _| server.remove_lockfile());
         }
+        async move {}
     })
     .detach();
 }

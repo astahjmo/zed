@@ -1584,16 +1584,17 @@ impl AgentPanel {
     ) {
         // Share links / clipboard imports enter with only a session id. If
         // this machine already has a metadata row for the session, route
-        // through the normal thread-id path.
-        let existing_thread_id = ThreadMetadataStore::try_global(cx).and_then(|store| {
+        // through the normal thread-id path using the agent that originally
+        // created the thread (not always NativeAgent).
+        let existing = ThreadMetadataStore::try_global(cx).and_then(|store| {
             store
                 .read(cx)
                 .entry_by_session(&session_id)
-                .map(|m| m.thread_id)
+                .map(|m| (m.thread_id, crate::Agent::from(m.agent_id.clone())))
         });
-        if let Some(thread_id) = existing_thread_id {
+        if let Some((thread_id, agent)) = existing {
             self.load_agent_thread(
-                crate::Agent::NativeAgent,
+                agent,
                 thread_id,
                 work_dirs,
                 title,
@@ -1604,7 +1605,7 @@ impl AgentPanel {
             );
         } else {
             self.external_thread_by_session(
-                crate::Agent::NativeAgent,
+                self.selected_agent(cx),
                 session_id,
                 work_dirs,
                 title,

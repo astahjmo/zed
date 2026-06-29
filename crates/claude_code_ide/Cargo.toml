@@ -14,6 +14,8 @@ path = "src/claude_code_ide.rs"
 doctest = false
 
 [dependencies]
+agent-client-protocol.workspace = true
+agent_ui.workspace = true
 anyhow.workspace = true
 async-tungstenite.workspace = true
 buffer_diff.workspace = true
