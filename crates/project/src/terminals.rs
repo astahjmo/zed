@@ -6,12 +6,13 @@ use async_channel::bounded;
 use futures::{FutureExt, future::Shared};
 use itertools::Itertools as _;
 use language::LanguageName;
-use remote::RemoteClient;
+use remote::{Interactive, RemoteClient};
 use settings::{Settings, SettingsLocation};
 use std::{
     borrow::Cow,
     path::{Path, PathBuf},
     sync::Arc,
+    time::Duration,
 };
 use task::{Shell, ShellBuilder, ShellKind, SpawnInTerminal};
 use terminal::{
@@ -259,7 +260,7 @@ impl Project {
                         settings.alternate_scroll,
                         settings.max_scroll_history_lines,
                         settings.path_hyperlink_regexes,
-                        settings.path_hyperlink_timeout_ms,
+                        Duration::from_millis(settings.path_hyperlink_timeout_ms),
                         is_via_remote,
                         cx.entity_id().as_u64(),
                         Some(completion_tx),
@@ -437,7 +438,7 @@ impl Project {
                         settings.alternate_scroll,
                         settings.max_scroll_history_lines,
                         settings.path_hyperlink_regexes,
-                        settings.path_hyperlink_timeout_ms,
+                        Duration::from_millis(settings.path_hyperlink_timeout_ms),
                         is_via_remote,
                         cx.entity_id().as_u64(),
                         None,
@@ -582,6 +583,7 @@ impl Project {
                             &env,
                             None,
                             None,
+                            Interactive::Yes,
                         )?;
                         let mut command = new_std_command(command_template.program);
                         command.args(command_template.args);
@@ -655,6 +657,7 @@ fn create_remote_shell(
         &env,
         working_directory.map(|path| path.display().to_string()),
         None,
+        Interactive::Yes,
     )?;
 
     log::debug!("Connecting to a remote server: {:?}", command.program);

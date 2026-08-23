@@ -1,3 +1,5 @@
+> [!IMPORTANT]
+> Remove this line to confirm you've reviewed this PR before submitting.
 ## This fork
 
 Fork of [zed-industries/zed](https://github.com/zed-industries/zed) with native
