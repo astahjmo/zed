@@ -9,7 +9,7 @@
 //! own save.
 
 use crate::server::{ProtocolError, error_codes};
-use buffer_diff::{BufferDiff, DiffBaseKind};
+use buffer_diff::BufferDiff;
 use editor::{DiffViewStyle, MultiBuffer, SelectionEffects, SplittableEditor, scroll::Autoscroll};
 use futures::channel::oneshot;
 use gpui::{AnyWindowHandle, AppContext as _, AsyncApp, DismissEvent, WeakEntity};
@@ -61,7 +61,7 @@ pub async fn open_diff(
         .update(cx, |_root, _window, cx| {
             let buffer = cx.new(|cx| Buffer::local(new_file_contents.clone(), cx));
             let snapshot = buffer.read(cx).text_snapshot();
-            let diff = cx.new(|cx| BufferDiff::new(&snapshot, None, None, DiffBaseKind::Custom, cx));
+            let diff = cx.new(|cx| BufferDiff::new(&snapshot, None, None, cx));
             let base_ready = diff.update(cx, |diff, cx| {
                 diff.set_base_text(Some(old_contents.into()), snapshot, cx)
             });
